@@ -18,6 +18,11 @@ type Props = {
 };
 
 const distList: Keypoint[] = new Array(12).fill({ x: 0, y: 0 });
+let lost: { state: boolean; prev: boolean; at: number } = {
+  state: false,
+  prev: false,
+  at: 0,
+};
 
 type Handpose = Keypoint[];
 
@@ -26,16 +31,12 @@ const Sketch = dynamic(import("react-p5"), {
   ssr: false,
 });
 
-export const Interaction20 = ({ handpose, scene, setScene }: Props) => {
+export const Interaction020 = ({ handpose, scene, setScene }: Props) => {
   let handposeHistory: {
     left: Handpose[];
     right: Handpose[];
   } = { left: [], right: [] };
-  let lost: { state: boolean; prev: boolean; at: number } = {
-    state: false,
-    prev: false,
-    at: 0,
-  };
+
   const debugLog = useRef<{ label: string; value: any }[]>([]);
 
   const circleSize = 80;
@@ -75,6 +76,8 @@ export const Interaction20 = ({ handpose, scene, setScene }: Props) => {
   };
 
   const draw = (p5: p5Types) => {
+    lost = updateLost(handpose.current, lost);
+    setScene(updateStyleIndex(lost, scene, 2));
     const rawHands: {
       left: Handpose;
       right: Handpose;
@@ -84,9 +87,6 @@ export const Interaction20 = ({ handpose, scene, setScene }: Props) => {
       left: Handpose;
       right: Handpose;
     } = getSmoothedHandpose(rawHands, handposeHistory); //平滑化された手指の動きを取得する
-
-    lost = updateLost(handpose.current, lost);
-    setScene(updateStyleIndex(lost, scene, 2));
 
     // logとしてmonitorに表示する
     debugLog.current = [];
