@@ -25,7 +25,7 @@ export default function App() {
 
   const lostCountRef = useRef(0);
   const sketchContainerRef = useRef<HTMLDivElement>(null);
-  const timer = 120000;
+  const timer = 360000;
 
   const capture = useCallback(async () => {
     if (typeof webcamRef.current && modelRef.current) {
@@ -51,7 +51,7 @@ export default function App() {
         if (lostCountRef.current > 5) {
           predictionsRef.current = [];
         }
-        if (lostCountRef.current > 100) {
+        if (lostCountRef.current > 200) {
           setConsented(false);
           setLost(true);
         }
