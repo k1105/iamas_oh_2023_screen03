@@ -6,6 +6,7 @@ import { ConsentForm } from "../sketch/ConsentForm";
 import { Interaction020 } from "../sketch/Interaction020";
 import { Interaction018 } from "../sketch/Interaction018";
 import { PixelInput } from "@tensorflow-models/hand-pose-detection/dist/shared/calculators/interfaces/common_interfaces";
+import { ScreenSaver } from "../sketch/ScreenSaver";
 import Head from "next/head";
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
   const [ready, setReady] = useState<boolean>(false);
   const [scene, setScene] = useState<number>(0);
   const [consented, setConsented] = useState<boolean>(false);
+  const [lost, setLost] = useState<boolean>(true);
   const headerTexts = [
     { eng: "Interaction020", text: "界面を確かめる" },
     { eng: "Interaction018", text: "界面を確かめる-02" },
@@ -41,6 +43,7 @@ export default function App() {
         ) {
           predictionsRef.current = predictions;
           lostCountRef.current = 0;
+          setLost(false);
         } else {
           lostCountRef.current++;
         }
@@ -50,6 +53,7 @@ export default function App() {
         }
         if (lostCountRef.current > 100) {
           setConsented(false);
+          setLost(true);
         }
       }
     }
@@ -96,54 +100,63 @@ export default function App() {
         <>
           <div ref={sketchContainerRef}>
             {(() => {
-              if (!consented) {
-                return (
-                  <ConsentForm
-                    handpose={predictionsRef}
-                    setConsented={setConsented}
-                  />
-                );
+              if (lost) {
+                return <ScreenSaver />;
               } else {
-                if (scene == 0) {
+                if (!consented) {
                   return (
-                    <Interaction020
+                    <ConsentForm
                       handpose={predictionsRef}
-                      scene={scene}
-                      setScene={setScene}
+                      setConsented={setConsented}
                     />
                   );
-                } else if (scene == 1) {
-                  return (
-                    <Interaction018
-                      handpose={predictionsRef}
-                      scene={scene}
-                      setScene={setScene}
-                    />
-                  );
+                } else {
+                  if (scene == 0) {
+                    return (
+                      <Interaction020
+                        handpose={predictionsRef}
+                        scene={scene}
+                        setScene={setScene}
+                      />
+                    );
+                  } else if (scene == 1) {
+                    return (
+                      <Interaction018
+                        handpose={predictionsRef}
+                        scene={scene}
+                        setScene={setScene}
+                      />
+                    );
+                  }
                 }
               }
             })()}
           </div>
         </>
       )}
-      <div style={{ position: "absolute", width: "300px", top: "30px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            paddingLeft: "1rem",
-            height: "2.5rem",
-          }}
-        >
-          <p style={{ fontWeight: "bold", lineHeight: "2rem" }}>
-            {consented ? headerTexts[scene].eng : "Concent Form"}
-          </p>
-          <p style={{ fontFamily: "monospace", fontSize: "1.1rem" }}>
-            {consented ? headerTexts[scene].text : "実験協力のおねがい"}
-          </p>
+      {lost ? (
+        <></>
+      ) : (
+        <div style={{ position: "absolute", width: "300px", top: "30px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              paddingLeft: "1rem",
+              height: "2.5rem",
+            }}
+          >
+            <p style={{ fontWeight: "bold", lineHeight: "2rem" }}>
+              {consented ? headerTexts[scene].eng : "Concent Form"}
+            </p>
+            <p style={{ fontFamily: "monospace", fontSize: "1.1rem" }}>
+              {consented ? headerTexts[scene].text : "実験協力のおねがい"}
+            </p>
+          </div>
+          <hr />
         </div>
-        <hr />
-      </div>
+      )}
+
       <div
         style={{
           position: "absolute",
