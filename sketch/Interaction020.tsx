@@ -10,6 +10,7 @@ import { isFront } from "../lib/calculator/isFront";
 import Matter from "matter-js";
 import { updateLost } from "../lib/updateLost";
 import { updateStyleIndex } from "../lib/updateStyleIndex";
+import { circleIndicator } from "../lib/p5/circleIndicator";
 
 type Props = {
   handpose: MutableRefObject<Hand[]>;
@@ -40,6 +41,7 @@ export const Interaction020 = ({ handpose, scene, setScene }: Props) => {
   const debugLog = useRef<{ label: string; value: any }[]>([]);
 
   const circleSize = 80;
+  let detectedOnce = false;
 
   // module aliases
   let Engine = Matter.Engine,
@@ -76,8 +78,6 @@ export const Interaction020 = ({ handpose, scene, setScene }: Props) => {
   };
 
   const draw = (p5: p5Types) => {
-    lost = updateLost(handpose.current, lost);
-    setScene(updateStyleIndex(lost, scene, 2));
     const rawHands: {
       left: Handpose;
       right: Handpose;
@@ -103,6 +103,33 @@ export const Interaction020 = ({ handpose, scene, setScene }: Props) => {
     }
 
     p5.clear();
+
+    /**
+     * handle lost and scene
+     **/
+
+    if (handpose.current.length > 0) {
+      detectedOnce = true;
+    }
+    if (detectedOnce) {
+      lost = updateLost(handpose.current, lost);
+      if (lost.state) {
+        p5.push();
+        p5.translate(p5.width - 100, 100);
+        circleIndicator({
+          p5,
+          ratio: (new Date().getTime() - lost.at) / 2000,
+          text: "きりかわるまで",
+        });
+        p5.pop();
+        if ((new Date().getTime() - lost.at) / 2000 > 1) {
+          setScene((scene + 1) % 2);
+        }
+      }
+    }
+    /**
+     * handle lost and scene
+     **/
 
     p5.noStroke();
     //base circle

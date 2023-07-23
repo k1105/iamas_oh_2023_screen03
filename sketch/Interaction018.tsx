@@ -11,6 +11,7 @@ import Matter from "matter-js";
 import { getCurrentPosition } from "../lib/getCurrentPosition";
 import { updateLost } from "../lib/updateLost";
 import { updateStyleIndex } from "../lib/updateStyleIndex";
+import { circleIndicator } from "../lib/p5/circleIndicator";
 
 type Props = {
   handpose: MutableRefObject<Hand[]>;
@@ -37,6 +38,8 @@ export const Interaction018 = ({ handpose, scene, setScene }: Props) => {
   const offset = 60; // 左右の手指の出力位置の間隔
   const scale = 1; // 指先と付け根の距離の入力値に対する、出力時に使うスケール比。
   const circleSize = 200;
+
+  let detectedOnce = false;
 
   // module aliases
   let Engine = Matter.Engine,
@@ -92,8 +95,6 @@ export const Interaction018 = ({ handpose, scene, setScene }: Props) => {
   };
 
   const draw = (p5: p5Types) => {
-    lost = updateLost(handpose.current, lost);
-    setScene(updateStyleIndex(lost, scene, 2));
     Engine.update(engine);
     const rawHands: {
       left: Handpose;
@@ -114,21 +115,37 @@ export const Interaction018 = ({ handpose, scene, setScene }: Props) => {
       });
     }
 
-    // --
-    // <> pinky
-    // <> ring
-    // <> middle
-    // <> index
-    // <> thumb
-    // --
-    // if one hand is detected, both side of organ is shrink / extend.
-    // if two hands are detected, each side of organ changes according to each hand.
-
     let start: number = 0;
     let end: number = 0;
 
     const posArr: { x: number; y: number }[] = [];
     p5.clear();
+    /**
+     * handle lost and scene
+     **/
+
+    if (handpose.current.length > 0) {
+      detectedOnce = true;
+    }
+    if (detectedOnce) {
+      lost = updateLost(handpose.current, lost);
+      if (lost.state) {
+        p5.push();
+        p5.translate(p5.width - 100, 100);
+        circleIndicator({
+          p5,
+          ratio: (new Date().getTime() - lost.at) / 2000,
+          text: "きりかわるまで",
+        });
+        p5.pop();
+        if ((new Date().getTime() - lost.at) / 2000 > 1) {
+          setScene((scene + 1) % 2);
+        }
+      }
+    }
+    /**
+     * handle lost and scene
+     **/
     if (hands.left.length > 0 || hands.right.length > 0) {
       //右手、左手のうちのどちらかが認識されていた場合
       // 片方の手の動きをもう片方に複製する
