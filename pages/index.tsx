@@ -25,7 +25,7 @@ export default function App() {
 
   const lostCountRef = useRef(0);
   const sketchContainerRef = useRef<HTMLDivElement>(null);
-  const timer = 360000;
+  const timer = 3600000;
 
   const capture = useCallback(async () => {
     if (typeof webcamRef.current && modelRef.current) {
@@ -147,13 +147,18 @@ export default function App() {
             }}
           >
             <p style={{ fontWeight: "bold", lineHeight: "2rem" }}>
-              {consented ? headerTexts[scene].eng : "Concent Form"}
+              {consented ? headerTexts[scene].eng : "Consent Form"}
             </p>
             <p style={{ fontFamily: "monospace", fontSize: "1.1rem" }}>
               {consented ? headerTexts[scene].text : "実験協力のおねがい"}
             </p>
           </div>
           <hr />
+          {consented ? (
+            <p style={{ textAlign: "right" }}>{scene + 1} / 2</p>
+          ) : (
+            <></>
+          )}
         </div>
       )}
 
