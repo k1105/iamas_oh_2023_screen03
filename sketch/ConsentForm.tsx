@@ -3,7 +3,7 @@ import p5Types from "p5";
 import { MutableRefObject, useRef, Dispatch, SetStateAction } from "react";
 import { Hand } from "@tensorflow-models/hand-pose-detection";
 import { getSmoothedHandpose } from "../lib/getSmoothedHandpose";
-import { updateHandposeHistory } from "../lib/updateHandposeHistory";
+import { HandposeHistory } from "../lib/HandPoseHistoryClass";
 import { Keypoint } from "@tensorflow-models/hand-pose-detection";
 import { dotHand } from "../lib/p5/dotHand";
 import { isFront } from "../lib/calculator/isFront";
@@ -35,10 +35,7 @@ const Sketch = dynamic(import("react-p5"), {
 });
 
 export const ConsentForm = ({ handpose, setConsented }: Props) => {
-  let handposeHistory: {
-    left: Handpose[];
-    right: Handpose[];
-  } = { left: [], right: [] };
+  let handposeHistory = new HandposeHistory();
 
   const debugLog = useRef<{ label: string; value: any }[]>([]);
 
@@ -62,7 +59,7 @@ export const ConsentForm = ({ handpose, setConsented }: Props) => {
     rawHands.left = resizeHandpose(rawHands.left, 1000);
     rawHands.right = resizeHandpose(rawHands.right, 1000);
 
-    handposeHistory = updateHandposeHistory(rawHands, handposeHistory); //handposeHistoryの更新
+    handposeHistory.update(rawHands); //handposeHistoryの更新
     const hands: {
       left: Handpose;
       right: Handpose;

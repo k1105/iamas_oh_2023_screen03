@@ -3,13 +3,12 @@ import p5Types from "p5";
 import { MutableRefObject, useRef, Dispatch, SetStateAction } from "react";
 import { Hand } from "@tensorflow-models/hand-pose-detection";
 import { getSmoothedHandpose } from "../lib/getSmoothedHandpose";
-import { updateHandposeHistory } from "../lib/updateHandposeHistory";
+import { HandposeHistory } from "../lib/HandPoseHistoryClass";
 import { Keypoint } from "@tensorflow-models/hand-pose-detection";
 import { convertHandToHandpose } from "../lib/converter/convertHandToHandpose";
 import { isFront } from "../lib/calculator/isFront";
 import Matter from "matter-js";
-import { updateLost } from "../lib/updateLost";
-import { updateStyleIndex } from "../lib/updateStyleIndex";
+import { LostManager } from "../lib/LostManagerClass";
 import { circleIndicator } from "../lib/p5/circleIndicator";
 
 type Props = {
@@ -19,11 +18,7 @@ type Props = {
 };
 
 const distList: Keypoint[] = new Array(12).fill({ x: 0, y: 0 });
-let lost: { state: boolean; prev: boolean; at: number } = {
-  state: false,
-  prev: false,
-  at: 0,
-};
+let lost = new LostManager();
 
 type Handpose = Keypoint[];
 
@@ -33,10 +28,7 @@ const Sketch = dynamic(import("react-p5"), {
 });
 
 export const Interaction020 = ({ handpose, scene, setScene }: Props) => {
-  let handposeHistory: {
-    left: Handpose[];
-    right: Handpose[];
-  } = { left: [], right: [] };
+  let handposeHistory = new HandposeHistory();
 
   const debugLog = useRef<{ label: string; value: any }[]>([]);
 
@@ -82,7 +74,7 @@ export const Interaction020 = ({ handpose, scene, setScene }: Props) => {
       left: Handpose;
       right: Handpose;
     } = convertHandToHandpose(handpose.current);
-    handposeHistory = updateHandposeHistory(rawHands, handposeHistory); //handposeHistoryの更新
+    handposeHistory.update(rawHands); //handposeHistoryの更新
     const hands: {
       left: Handpose;
       right: Handpose;
@@ -112,7 +104,7 @@ export const Interaction020 = ({ handpose, scene, setScene }: Props) => {
       detectedOnce = true;
     }
     if (detectedOnce) {
-      lost = updateLost(handpose.current, lost);
+      lost.update(handpose.current);
       if (lost.state) {
         p5.push();
         p5.translate(p5.width - 100, 100);
@@ -215,17 +207,6 @@ export const Interaction020 = ({ handpose, scene, setScene }: Props) => {
         p5.rotate(angle);
         p5.rect(0, 0, dist, 10);
         p5.pop();
-        // p5.push();
-        // p5.noFill();
-        // p5.strokeWeight(1);
-        // p5.translate(floors[i].position.x, floors[i].position.y);
-        // p5.rotate(floors[i].angle);
-        // const [w, h] = [
-        //   floors[i].bounds.max.x - floors[i].bounds.min.x,
-        //   floors[i].bounds.max.y - floors[i].bounds.min.y,
-        // ];
-        // p5.rect(0, 0, w, h);
-        // p5.pop();
       }
     }
     p5.pop();
