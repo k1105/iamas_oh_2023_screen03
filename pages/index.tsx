@@ -103,32 +103,32 @@ export default function App() {
               if (lost) {
                 return <ScreenSaver />;
               } else {
-                if (!consented) {
+                // if (!consented) {
+                //   return (
+                //     <ConsentForm
+                //       handpose={predictionsRef}
+                //       setConsented={setConsented}
+                //     />
+                //   );
+                // } else {
+                if (scene == 0) {
                   return (
-                    <ConsentForm
+                    <Interaction020
                       handpose={predictionsRef}
-                      setConsented={setConsented}
+                      scene={scene}
+                      setScene={setScene}
                     />
                   );
-                } else {
-                  if (scene == 0) {
-                    return (
-                      <Interaction020
-                        handpose={predictionsRef}
-                        scene={scene}
-                        setScene={setScene}
-                      />
-                    );
-                  } else if (scene == 1) {
-                    return (
-                      <Interaction018
-                        handpose={predictionsRef}
-                        scene={scene}
-                        setScene={setScene}
-                      />
-                    );
-                  }
+                } else if (scene == 1) {
+                  return (
+                    <Interaction018
+                      handpose={predictionsRef}
+                      scene={scene}
+                      setScene={setScene}
+                    />
+                  );
                 }
+                // }
               }
             })()}
           </div>
@@ -147,10 +147,10 @@ export default function App() {
             }}
           >
             <p style={{ fontWeight: "bold", lineHeight: "2rem" }}>
-              {consented ? headerTexts[scene].eng : "Consent Form"}
+              {headerTexts[scene].eng}
             </p>
             <p style={{ fontFamily: "monospace", fontSize: "1.1rem" }}>
-              {consented ? headerTexts[scene].text : "実験協力のおねがい"}
+              {headerTexts[scene].text}
             </p>
           </div>
           <hr />
